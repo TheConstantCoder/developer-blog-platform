@@ -11,6 +11,8 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:supabase": "node scripts/test-supabase-connection.js",
+    "test:auth": "node scripts/test-auth-flow.js",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset"
@@ -47,6 +49,7 @@
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "dotenv": "^17.2.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",
     "jest": "^29.7.0",
