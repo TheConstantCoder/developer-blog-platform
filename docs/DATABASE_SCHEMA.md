@@ -138,6 +138,7 @@ CREATE TABLE comments (
     parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
     is_approved BOOLEAN DEFAULT false,
+    is_flagged BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -146,6 +147,7 @@ CREATE TABLE comments (
 **Key Features:**
 - Nested/threaded comments support
 - Moderation system with approval
+- Content flagging for inappropriate comments
 - Only approved comments visible to guests
 
 ### 8. Newsletter Subscribers
@@ -159,9 +161,16 @@ CREATE TABLE newsletter_subscribers (
     subscribed_at TIMESTAMPTZ DEFAULT NOW(),
     unsubscribed_at TIMESTAMPTZ,
     confirmation_token TEXT,
-    is_confirmed BOOLEAN DEFAULT false
+    is_confirmed BOOLEAN DEFAULT false,
+    preferences JSONB DEFAULT '{}'
 );
 ```
+
+**Key Features:**
+- Email subscription management with confirmation
+- Active/inactive status tracking
+- Subscriber preferences stored as JSONB
+- Unsubscribe tracking with timestamps
 
 ## Custom Types
 
