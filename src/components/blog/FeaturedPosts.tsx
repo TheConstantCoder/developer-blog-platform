@@ -6,67 +6,6 @@ import { CalendarIcon, ClockIcon, TagIcon } from '@heroicons/react/24/outline'
 import { Post } from '@/types'
 import { supabase } from '@/lib/supabase'
 
-// Mock data for now - will be replaced with real Supabase data
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    title: 'Building Modern Web Applications with Next.js 14',
-    slug: 'building-modern-web-apps-nextjs-14',
-    excerpt: 'Explore the latest features in Next.js 14 including the App Router, Server Components, and improved performance optimizations.',
-    content: '',
-    published: true,
-    featured: true,
-    author_id: '1',
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z',
-    published_at: '2024-01-15T10:00:00Z',
-    meta_title: null,
-    meta_description: null,
-    cover_image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop',
-    reading_time: 8,
-    view_count: 1250,
-    tags: ['Next.js', 'React', 'Web Development']
-  },
-  {
-    id: '2',
-    title: 'Mastering TypeScript: Advanced Patterns and Best Practices',
-    slug: 'mastering-typescript-advanced-patterns',
-    excerpt: 'Deep dive into advanced TypeScript patterns, utility types, and best practices for building type-safe applications.',
-    content: '',
-    published: true,
-    featured: true,
-    author_id: '1',
-    created_at: '2024-01-10T14:30:00Z',
-    updated_at: '2024-01-10T14:30:00Z',
-    published_at: '2024-01-10T14:30:00Z',
-    meta_title: null,
-    meta_description: null,
-    cover_image: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=400&fit=crop',
-    reading_time: 12,
-    view_count: 890,
-    tags: ['TypeScript', 'JavaScript', 'Programming']
-  },
-  {
-    id: '3',
-    title: 'Database Design with Supabase: From Schema to Production',
-    slug: 'database-design-supabase-schema-production',
-    excerpt: 'Learn how to design scalable database schemas with Supabase, including RLS policies, triggers, and real-time subscriptions.',
-    content: '',
-    published: true,
-    featured: true,
-    author_id: '1',
-    created_at: '2024-01-05T09:15:00Z',
-    updated_at: '2024-01-05T09:15:00Z',
-    published_at: '2024-01-05T09:15:00Z',
-    meta_title: null,
-    meta_description: null,
-    cover_image: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&h=400&fit=crop',
-    reading_time: 15,
-    view_count: 567,
-    tags: ['Supabase', 'Database', 'PostgreSQL']
-  }
-]
-
 export function FeaturedPosts() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -74,24 +13,33 @@ export function FeaturedPosts() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // Try to fetch from Supabase first
         const { data, error } = await supabase
           .from('posts')
-          .select('*')
-          .eq('published', true)
-          .eq('featured', true)
+          .select(`
+            *,
+            author:profiles(full_name, avatar_url),
+            post_tags(
+              tags(name, slug, color)
+            )
+          `)
+          .eq('status', 'published')
           .order('published_at', { ascending: false })
           .limit(3)
 
         if (error) {
-          console.log('Supabase not configured yet, using mock data')
-          setPosts(mockPosts)
+          console.error('Error fetching featured posts:', error)
+          setPosts([])
         } else {
-          setPosts(data || mockPosts)
+          // Transform the data to include tags
+          const transformedPosts = data?.map(post => ({
+            ...post,
+            tags: post.post_tags?.map((pt: any) => pt.tags) || []
+          })) || []
+          setPosts(transformedPosts)
         }
       } catch (error) {
-        console.log('Using mock data:', error)
-        setPosts(mockPosts)
+        console.error('Error fetching featured posts:', error)
+        setPosts([])
       } finally {
         setLoading(false)
       }
@@ -125,10 +73,10 @@ export function FeaturedPosts() {
           <Link href={`/blog/${post.slug}`} className="block">
             <div className="card hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
               {/* Cover Image */}
-              {post.cover_image && (
+              {post.featured_image_url && (
                 <div className="aspect-video mb-4 overflow-hidden rounded-lg">
                   <img
-                    src={post.cover_image}
+                    src={post.featured_image_url}
                     alt={post.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
