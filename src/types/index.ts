@@ -38,19 +38,20 @@ export interface Post {
   slug: string
   content: string
   excerpt?: string
-  featured_image?: string
-  published: boolean
+  featured_image_url?: string
+  status: 'draft' | 'published' | 'archived'
   published_at?: string
   author_id: string
   created_at: string
   updated_at: string
   view_count: number
+  meta_title?: string
+  meta_description?: string
+  reading_time?: number
+  // Joined data (not in database)
   tags?: Tag[]
   author?: Profile
   comments?: Comment[]
-  reading_time?: number
-  seo_title?: string
-  seo_description?: string
 }
 
 export interface Project {
