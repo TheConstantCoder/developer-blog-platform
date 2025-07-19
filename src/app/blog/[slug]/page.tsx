@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { PostContent } from '@/components/blog/PostContent'
-import { PostMeta } from '@/components/blog/PostMeta'
+// import { PostMeta } from '@/components/blog/PostMeta' // Temporarily disabled
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
 import { PostComments } from '@/components/blog/PostComments'
 import { ShareButtons } from '@/components/blog/ShareButtons'
@@ -229,8 +229,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="lg:grid lg:grid-cols-4 lg:gap-12">
             {/* Main Content */}
             <div className="lg:col-span-3">
-              {/* Post Meta */}
-              <PostMeta post={post} />
+              {/* Post Meta - Temporarily disabled for debugging */}
+              {/* <PostMeta post={post} /> */}
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Published on {new Date(post.published_at || post.created_at).toLocaleDateString()}
+                  {post.reading_time && ` • ${post.reading_time} min read`}
+                  {post.view_count > 0 && ` • ${post.view_count} views`}
+                </p>
+              </div>
 
               {/* Post Content */}
               <div className="mt-8">

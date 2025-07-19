@@ -22,11 +22,15 @@ export function BlogFilters({ selectedTag = '' }: BlogFiltersProps) {
 
   const fetchTags = async () => {
     try {
+      // Get all tags with their post counts
       const { data, error } = await supabase
         .from('tags')
         .select(`
           *,
-          post_tags(count)
+          post_tags(
+            post_id,
+            posts!inner(status)
+          )
         `)
         .order('name')
 
@@ -35,15 +39,15 @@ export function BlogFilters({ selectedTag = '' }: BlogFiltersProps) {
         return
       }
 
-      // Transform data to include post count
+      // Transform data to include post count (only published posts)
       const tagsWithCount = data?.map(tag => ({
         ...tag,
-        post_count: tag.post_tags?.length || 0
+        post_count: tag.post_tags?.filter(pt => pt.posts?.status === 'published').length || 0
       })) || []
 
-      // Filter out tags with no posts
+      // Filter out tags with no published posts
       const activeTags = tagsWithCount.filter(tag => tag.post_count > 0)
-      
+
       setTags(activeTags)
     } catch (error) {
       console.error('Error fetching tags:', error)

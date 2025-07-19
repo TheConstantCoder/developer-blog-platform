@@ -90,11 +90,11 @@ export function FeaturedPosts() {
                   <div className="flex flex-wrap gap-2">
                     {post.tags.slice(0, 2).map((tag) => (
                       <span
-                        key={tag}
+                        key={tag.id || tag.slug}
                         className="inline-flex items-center gap-1 rounded-full bg-primary-50 dark:bg-primary-900/20 px-2 py-1 text-xs font-medium text-primary-700 dark:text-primary-300"
                       >
                         <TagIcon className="h-3 w-3" />
-                        {tag}
+                        {tag.name}
                       </span>
                     ))}
                   </div>

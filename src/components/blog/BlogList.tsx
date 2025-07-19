@@ -70,17 +70,32 @@ export function BlogList({ page, search, tag, sort }: BlogListProps) {
 
       // Apply tag filter
       if (tag) {
-        // This requires a more complex query with joins
-        const { data: taggedPosts } = await supabase
-          .from('post_tags')
-          .select('post_id')
-          .eq('tags.slug', tag)
+        // First get the tag ID from the slug
+        const { data: tagData } = await supabase
+          .from('tags')
+          .select('id')
+          .eq('slug', tag)
+          .single()
 
-        if (taggedPosts && taggedPosts.length > 0) {
-          const postIds = taggedPosts.map(tp => tp.post_id)
-          query = query.in('id', postIds)
+        if (tagData) {
+          // Then get posts with this tag
+          const { data: taggedPosts } = await supabase
+            .from('post_tags')
+            .select('post_id')
+            .eq('tag_id', tagData.id)
+
+          if (taggedPosts && taggedPosts.length > 0) {
+            const postIds = taggedPosts.map(tp => tp.post_id)
+            query = query.in('id', postIds)
+          } else {
+            // No posts with this tag
+            setPosts([])
+            setTotalPosts(0)
+            setLoading(false)
+            return
+          }
         } else {
-          // No posts with this tag
+          // Tag not found
           setPosts([])
           setTotalPosts(0)
           setLoading(false)
