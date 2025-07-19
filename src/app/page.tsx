@@ -3,6 +3,7 @@ import { Hero } from '@/components/layout/Hero'
 import { FeaturedPosts } from '@/components/blog/FeaturedPosts'
 import { FeaturedProjects } from '@/components/projects/FeaturedProjects'
 import { Newsletter } from '@/components/forms/Newsletter'
+import { ErrorMessage } from '@/components/ui/ErrorMessage'
 
 export const metadata: Metadata = {
   title: 'Home',
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="space-y-16 pb-16">
+      {/* Error Message Display */}
+      <ErrorMessage />
+
       {/* Hero Section */}
       <Hero />
       

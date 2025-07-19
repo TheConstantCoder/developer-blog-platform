@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '@/lib/supabase'
@@ -9,12 +9,23 @@ import { useAuth } from '@/app/providers'
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading } = useAuth()
+
+  // Store return URL in session storage for post-login redirect
+  useEffect(() => {
+    const returnUrl = searchParams.get('returnUrl')
+    if (returnUrl) {
+      sessionStorage.setItem('returnUrl', returnUrl)
+    }
+  }, [searchParams])
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user) {
-      router.push('/')
+      const returnUrl = sessionStorage.getItem('returnUrl') || '/'
+      sessionStorage.removeItem('returnUrl')
+      router.push(returnUrl)
     }
   }, [user, loading, router])
 
@@ -64,7 +75,7 @@ export default function SignInPage() {
                 input: 'auth-input',
               },
             }}
-            providers={['github']}
+            providers={['github', 'google']}
             redirectTo={`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`}
             onlyThirdPartyProviders={false}
             magicLink={true}

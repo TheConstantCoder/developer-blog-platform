@@ -30,10 +30,18 @@ export default function AuthCallbackPage() {
           if (data.user) {
             setStatus('success')
             setMessage('Authentication successful! Redirecting...')
-            
-            // Redirect to home page after a short delay
+
+            // Check for return URL in session storage or URL params
+            const returnUrl = sessionStorage.getItem('returnUrl') ||
+                            searchParams.get('returnUrl') ||
+                            '/'
+
+            // Clear return URL from session storage
+            sessionStorage.removeItem('returnUrl')
+
+            // Redirect to return URL or home page after a short delay
             setTimeout(() => {
-              router.push('/')
+              router.push(returnUrl)
             }, 1500)
           }
         } else {

@@ -3,19 +3,45 @@
   "version": "0.1.0",
   "private": true,
   "description": "A modern developer blog platform built with Next.js, React, and Supabase",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheConstantCoder/developer-blog-platform.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TheConstantCoder/developer-blog-platform/issues"
+  },
+  "homepage": "https://github.com/TheConstantCoder/developer-blog-platform#readme",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:database": "jest __tests__/database.test.ts",
+    "test:rls": "jest __tests__/rls-policies.test.ts",
+    "test:db-all": "jest __tests__/database.test.ts __tests__/rls-policies.test.ts",
     "test:supabase": "node scripts/test-supabase-connection.js",
     "test:auth": "node scripts/test-auth-flow.js",
+    "test:middleware": "node scripts/test-middleware-auth.js",
+    "update-role": "node scripts/update-user-role.js",
+    "test:db-simple": "node scripts/test-database-simple.js",
+    "test:migrations": "node scripts/test-migrations-final.js",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
-    "supabase:reset": "supabase db reset"
+    "supabase:reset": "supabase db reset",
+    "clean": "rm -rf .next node_modules/.cache",
+    "validate": "npm run type-check && npm run lint && npm run format:check && npm run test",
+    "prepare": "npm run validate"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
