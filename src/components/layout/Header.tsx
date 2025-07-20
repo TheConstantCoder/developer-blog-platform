@@ -12,11 +12,12 @@ import {
   MoonIcon,
   UserCircleIcon,
   Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 import { Menu, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
+import { ClientOnly } from '@/components/common/ClientOnly'
 import clsx from 'clsx'
 
 const navigation = [
@@ -85,38 +86,47 @@ export function Header() {
         {/* Right side actions */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-x-4">
           {/* Theme toggle */}
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="rounded-md p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-200"
-            aria-label="Toggle theme"
-          >
-            <SunIcon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <MoonIcon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </button>
+          <ClientOnly fallback={
+            <div className="rounded-md p-2 w-9 h-9 bg-gray-100 dark:bg-gray-700 animate-pulse"></div>
+          }>
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="rounded-md p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-200"
+              aria-label="Toggle theme"
+            >
+              <SunIcon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <MoonIcon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            </button>
+          </ClientOnly>
 
           {/* User menu */}
-          {user ? (
-            <Menu as="div" className="relative">
-              <div>
-                <Menu.Button className="flex items-center space-x-2 rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 pr-2">
-                  <span className="sr-only">Open user menu</span>
-                  {profile?.avatar_url ? (
-                    <img
-                      className="h-8 w-8 rounded-full"
-                      src={profile.avatar_url}
-                      alt={profile.full_name || 'User avatar'}
-                    />
-                  ) : (
-                    <UserCircleIcon className="h-8 w-8 text-gray-400" />
-                  )}
-                  {/* Admin Badge */}
-                  {profile?.role === 'admin' && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                      Admin
-                    </span>
-                  )}
-                </Menu.Button>
-              </div>
+          <ClientOnly fallback={
+            <div className="flex items-center space-x-4">
+              <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+            </div>
+          }>
+            {user ? (
+              <Menu as="div" className="relative">
+                <div>
+                  <Menu.Button className="flex items-center space-x-2 rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 pr-2">
+                    <span className="sr-only">Open user menu</span>
+                    {profile?.avatar_url ? (
+                      <img
+                        className="h-8 w-8 rounded-full"
+                        src={profile.avatar_url}
+                        alt={profile.full_name || 'User avatar'}
+                      />
+                    ) : (
+                      <UserCircleIcon className="h-8 w-8 text-gray-400" />
+                    )}
+                    {/* Admin Badge */}
+                    {profile?.role === 'admin' && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                        Admin
+                      </span>
+                    )}
+                  </Menu.Button>
+                </div>
               <Transition
                 as={Fragment}
                 enter="transition ease-out duration-100"
@@ -168,7 +178,7 @@ export function Header() {
                           'flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300'
                         )}
                       >
-                        <ArrowRightOnRectangleIcon className="mr-3 h-4 w-4" />
+                        <ArrowRightStartOnRectangleIcon className="mr-3 h-4 w-4" />
                         Sign out
                       </button>
                     )}
@@ -184,6 +194,7 @@ export function Header() {
               Sign in
             </Link>
           )}
+          </ClientOnly>
         </div>
       </nav>
 
@@ -247,46 +258,52 @@ export function Header() {
                     ))}
                   </div>
                   <div className="py-6">
-                    {user ? (
-                      <div className="space-y-2">
+                    <ClientOnly fallback={
+                      <div className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-400">
+                        Loading...
+                      </div>
+                    }>
+                      {user ? (
+                        <div className="space-y-2">
+                          <Link
+                            href="/dashboard"
+                            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            Dashboard
+                          </Link>
+
+                          {/* Admin Dashboard - only show for admin users */}
+                          {profile?.role === 'admin' && (
+                            <Link
+                              href="/admin/dashboard"
+                              className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-t border-gray-200 dark:border-gray-600 pt-4"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              🛡️ Admin Dashboard
+                            </Link>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              signOut()
+                              setMobileMenuOpen(false)
+                            }}
+                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          >
+                            Sign out
+                          </button>
+                        </div>
+                      ) : (
                         <Link
-                          href="/dashboard"
+                          href="/auth/signin"
                           className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          Dashboard
+                          Sign in
                         </Link>
-
-                        {/* Admin Dashboard - only show for admin users */}
-                        {profile?.role === 'admin' && (
-                          <Link
-                            href="/admin/dashboard"
-                            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-t border-gray-200 dark:border-gray-600 pt-4"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            🛡️ Admin Dashboard
-                          </Link>
-                        )}
-
-                        <button
-                          onClick={() => {
-                            signOut()
-                            setMobileMenuOpen(false)
-                          }}
-                          className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                        >
-                          Sign out
-                        </button>
-                      </div>
-                    ) : (
-                      <Link
-                        href="/auth/signin"
-                        className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Sign in
-                      </Link>
-                    )}
+                      )}
+                    </ClientOnly>
                   </div>
                 </div>
               </div>
