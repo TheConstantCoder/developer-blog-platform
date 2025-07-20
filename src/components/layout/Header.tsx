@@ -5,14 +5,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/app/providers'
-import { 
-  Bars3Icon, 
-  XMarkIcon, 
-  SunIcon, 
+import {
+  Bars3Icon,
+  XMarkIcon,
+  SunIcon,
   MoonIcon,
   UserCircleIcon,
   Cog6ToothIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 import { Menu, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
@@ -97,7 +98,7 @@ export function Header() {
           {user ? (
             <Menu as="div" className="relative">
               <div>
-                <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                <Menu.Button className="flex items-center space-x-2 rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 pr-2">
                   <span className="sr-only">Open user menu</span>
                   {profile?.avatar_url ? (
                     <img
@@ -107,6 +108,12 @@ export function Header() {
                     />
                   ) : (
                     <UserCircleIcon className="h-8 w-8 text-gray-400" />
+                  )}
+                  {/* Admin Badge */}
+                  {profile?.role === 'admin' && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                      Admin
+                    </span>
                   )}
                 </Menu.Button>
               </div>
@@ -123,7 +130,7 @@ export function Header() {
                   <Menu.Item>
                     {({ active }) => (
                       <Link
-                        href="/admin/dashboard"
+                        href="/dashboard"
                         className={clsx(
                           active ? 'bg-gray-100 dark:bg-gray-700' : '',
                           'flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300'
@@ -134,6 +141,24 @@ export function Header() {
                       </Link>
                     )}
                   </Menu.Item>
+
+                  {/* Admin Dashboard - only show for admin users */}
+                  {profile?.role === 'admin' && (
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/admin/dashboard"
+                          className={clsx(
+                            active ? 'bg-gray-100 dark:bg-gray-700' : '',
+                            'flex items-center px-4 py-2 text-sm text-red-700 dark:text-red-400 border-t border-gray-200 dark:border-gray-600'
+                          )}
+                        >
+                          <ShieldCheckIcon className="mr-3 h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+                    </Menu.Item>
+                  )}
                   <Menu.Item>
                     {({ active }) => (
                       <button
@@ -225,12 +250,24 @@ export function Header() {
                     {user ? (
                       <div className="space-y-2">
                         <Link
-                          href="/admin/dashboard"
+                          href="/dashboard"
                           className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Dashboard
                         </Link>
+
+                        {/* Admin Dashboard - only show for admin users */}
+                        {profile?.role === 'admin' && (
+                          <Link
+                            href="/admin/dashboard"
+                            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-t border-gray-200 dark:border-gray-600 pt-4"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            🛡️ Admin Dashboard
+                          </Link>
+                        )}
+
                         <button
                           onClick={() => {
                             signOut()

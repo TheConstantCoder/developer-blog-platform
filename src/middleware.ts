@@ -15,8 +15,20 @@ interface RouteConfig {
 }
 
 const routeConfigs: RouteConfig[] = [
-  // Admin routes - require admin role
-  { path: '/admin', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/' },
+  // Admin login - public access (separate from main auth)
+  { path: '/admin/login', requiresAuth: false },
+
+  // Specific admin routes - require admin role, redirect to admin login
+  { path: '/admin/dashboard', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+  { path: '/admin/posts', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+  { path: '/admin/projects', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+  { path: '/admin/tags', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+  { path: '/admin/comments', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+  { path: '/admin/users', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+  { path: '/admin/settings', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
+
+  // Catch-all admin routes - require admin role, redirect to admin login
+  { path: '/admin', requiresAuth: true, allowedRoles: ['admin'], redirectTo: '/admin/login' },
 
   // Dashboard routes - require any authenticated user
   { path: '/dashboard', requiresAuth: true, allowedRoles: ['user', 'admin', 'moderator'] },
@@ -75,6 +87,13 @@ export async function middleware(request: NextRequest) {
       if (response) {
         return addSecurityHeaders(response)
       }
+    } else {
+      // For unmatched routes, check if it's an admin route and block it
+      if (pathname.startsWith('/admin')) {
+        console.log(`[Security] Blocking unmatched admin route: ${pathname}`)
+        const adminLoginUrl = new URL('/admin/login', request.url)
+        return NextResponse.redirect(adminLoginUrl)
+      }
     }
 
     // Continue with security headers for unmatched routes
@@ -82,7 +101,13 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error('Middleware error:', error)
-    // On error, continue with security headers but no auth protection
+    // On error, if it's an admin route, redirect to admin login for security
+    if (pathname.startsWith('/admin')) {
+      console.log(`[Security] Error on admin route, redirecting to login: ${pathname}`)
+      const adminLoginUrl = new URL('/admin/login', request.url)
+      return NextResponse.redirect(adminLoginUrl)
+    }
+    // For other routes, continue with security headers
     return addSecurityHeaders(NextResponse.next())
   }
 }
@@ -114,11 +139,19 @@ async function handleRouteProtection(
     console.log(`[Protected Route] ${pathname} requires auth, user: ${!!user}`)
 
     if (!user) {
-      // User not authenticated - redirect to signin with return URL
-      const signInUrl = new URL('/auth/signin', request.url)
-      signInUrl.searchParams.set('returnUrl', pathname)
-      console.log(`[Protected Route] Redirecting to signin: ${signInUrl.toString()}`)
-      return NextResponse.redirect(signInUrl)
+      // User not authenticated - redirect based on route type
+      if (pathname.startsWith('/admin')) {
+        // Admin routes redirect to admin login
+        const adminLoginUrl = new URL('/admin/login', request.url)
+        console.log(`[Protected Route] Redirecting to admin login: ${adminLoginUrl.toString()}`)
+        return NextResponse.redirect(adminLoginUrl)
+      } else {
+        // Regular routes redirect to main signin
+        const signInUrl = new URL('/auth/signin', request.url)
+        signInUrl.searchParams.set('returnUrl', pathname)
+        console.log(`[Protected Route] Redirecting to signin: ${signInUrl.toString()}`)
+        return NextResponse.redirect(signInUrl)
+      }
     }
 
     // User is authenticated - check role permissions if specified
