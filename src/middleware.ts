@@ -53,8 +53,48 @@ export async function middleware(request: NextRequest) {
   console.log(`[Middleware] ${pathname} - Route config:`, routeConfig?.path || 'none')
 
   try {
-    // Get user session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Get user session - try multiple approaches
+    let session = null
+    let sessionError = null
+
+    // Method 1: Try standard getSession
+    const sessionResult = await supabase.auth.getSession()
+    session = sessionResult.data.session
+    sessionError = sessionResult.error
+
+    // Method 2: If no session, try to get user directly from token
+    if (!session) {
+      // Debug: Log all cookies to see what's available
+      const cookieNames = Array.from(request.cookies.getAll()).map(cookie => `${cookie.name}=${cookie.value.substring(0, 20)}...`)
+      console.log(`[Middleware] Available cookies:`, cookieNames)
+
+      // Try different possible cookie names
+      const possibleCookieNames = [
+        'sb-lgnkbjnmrrojwdxabdnj-auth-token',
+        'supabase-auth-token',
+        'supabase.auth.token'
+      ]
+
+      for (const cookieName of possibleCookieNames) {
+        const authCookie = request.cookies.get(cookieName)
+        if (authCookie) {
+          console.log(`[Middleware] Found auth cookie: ${cookieName}`)
+          try {
+            const tokenData = JSON.parse(authCookie.value)
+            if (tokenData.access_token) {
+              const { data: { user }, error } = await supabase.auth.getUser(tokenData.access_token)
+              if (user && !error) {
+                session = { user, access_token: tokenData.access_token }
+                console.log(`[Middleware] Recovered session from cookie for user: ${user.email}`)
+                break
+              }
+            }
+          } catch (cookieError) {
+            console.log(`[Middleware] Cookie parsing failed for ${cookieName}:`, cookieError)
+          }
+        }
+      }
+    }
 
     console.log(`[Middleware] Session exists:`, !!session, 'User:', session?.user?.email || 'none')
 

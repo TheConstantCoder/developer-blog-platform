@@ -7,21 +7,24 @@ import clsx from 'clsx'
 interface PaginationProps {
   currentPage: number
   totalPages: number
-  baseUrl: string
-  searchParams: URLSearchParams
+  baseUrl?: string
+  searchParams?: URLSearchParams
   maxVisiblePages?: number
+  onPageChange?: (page: number) => void
 }
 
-export function Pagination({ 
-  currentPage, 
-  totalPages, 
-  baseUrl, 
+export function Pagination({
+  currentPage,
+  totalPages,
+  baseUrl,
   searchParams,
-  maxVisiblePages = 5 
+  maxVisiblePages = 5,
+  onPageChange
 }: PaginationProps) {
   if (totalPages <= 1) return null
 
   const createPageUrl = (page: number) => {
+    if (!baseUrl || !searchParams) return '#'
     const params = new URLSearchParams(searchParams.toString())
     if (page === 1) {
       params.delete('page')
@@ -30,6 +33,12 @@ export function Pagination({
     }
     const queryString = params.toString()
     return queryString ? `${baseUrl}?${queryString}` : baseUrl
+  }
+
+  const handlePageClick = (page: number) => {
+    if (onPageChange) {
+      onPageChange(page)
+    }
   }
 
   // Calculate which page numbers to show

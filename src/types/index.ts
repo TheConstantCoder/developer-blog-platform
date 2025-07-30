@@ -58,14 +58,15 @@ export interface Project {
   id: string
   title: string
   slug: string
-  description: string
-  content?: string
-  featured_image?: string
-  demo_url?: string
-  github_url?: string
-  tech_stack: string[]
-  status: 'planning' | 'in-progress' | 'completed' | 'archived'
+  description: string | null
+  content?: string | null
+  featured_image_url?: string | null
+  demo_url?: string | null
+  github_url?: string | null
+  tech_stack: string[] | null
+  status: 'active' | 'completed' | 'archived'
   featured: boolean
+  is_public: boolean
   author_id: string
   created_at: string
   updated_at: string
